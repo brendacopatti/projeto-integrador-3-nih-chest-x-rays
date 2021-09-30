@@ -7,7 +7,7 @@
 * Processamento Analítico de Dados
 * Recuperação de Informação Baseada em Conteúdo
 
-## Base de dados utilizada:
+## Dataset utilizado:
 https://www.kaggle.com/nih-chest-xrays/data
 
 ## Alunos:
