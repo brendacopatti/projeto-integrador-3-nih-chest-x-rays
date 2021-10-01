@@ -11,7 +11,7 @@
 https://www.kaggle.com/nih-chest-xrays/data
 
 ## Diagrama entidade relacionamento:
-![image](https://user-images.githubusercontent.com/32989500/135688201-758afd16-bae8-4be7-a9c8-5c71380f8304.png)
+![image](https://user-images.githubusercontent.com/32989500/135688585-3151a086-dee8-4484-ab2a-519bdac1ea85.png)
 
 ## Para executar o código
 * Fazer o download das pastas de imagens images_001 e images_002 no link https://www.kaggle.com/nih-chest-xrays/data
