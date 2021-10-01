@@ -10,6 +10,11 @@
 ## Dataset utilizado:
 https://www.kaggle.com/nih-chest-xrays/data
 
+## Para executar o código
+* Fazer o download das pastas de imagens images_001 e images_002 no link https://www.kaggle.com/nih-chest-xrays/data
+* Ajustar as constantes conforme configuração da máquina no arquivo constant.py
+* Importante: por conta do volume de dados, alguns processos podem levar um tempo considerável para ser executado
+
 ## Alunos:
 * Brenda Sabrina Copatti
 * Gustavo Henrique Migliorini
