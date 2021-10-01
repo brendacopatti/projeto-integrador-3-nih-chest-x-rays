@@ -10,6 +10,9 @@
 ## Dataset utilizado:
 https://www.kaggle.com/nih-chest-xrays/data
 
+## Diagrama entidade relacionamento:
+![image](https://user-images.githubusercontent.com/32989500/135688201-758afd16-bae8-4be7-a9c8-5c71380f8304.png)
+
 ## Para executar o código
 * Fazer o download das pastas de imagens images_001 e images_002 no link https://www.kaggle.com/nih-chest-xrays/data
 * Ajustar as constantes conforme configuração da máquina no arquivo constant.py
