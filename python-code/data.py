@@ -13,17 +13,17 @@ df_x_ray = pd.read_csv(
 df_x_ray[10] = ''
 
 df_x_ray = df_x_ray.rename({
-    0: 'image_file_name', 
-    1: 'finding_label', 
-    2: 'follow_up_id', 
-    3: 'patient_id', 
-    4: 'patient_age',
-    5: 'patient_gender',
-    6: 'view_position',
-    7: 'original_image_width',
-    8: 'original_image_height',
-    9: 'original_image_pixel_spacing',
-    10: 'image_directory_file_name'},
+    0: constant.IMAGE_FILE_NAME, 
+    1: constant.FINDING_LABEL, 
+    2: constant.FOLLOW_UP_ID, 
+    3: constant.PATIENT_ID, 
+    4: constant.PATIENT_AGE,
+    5: constant.PATIENT_GENDER,
+    6: constant.VIEW_POSITION,
+    7: constant.ORIGINAL_IMAGE_WIDTH,
+    8: constant.ORIGINAL_IMAGE_HEIGHT,
+    9: constant.ORIGINAL_IMAGE_SPACING,
+    10: constant.IMAGE_DIRECTORY_FILE_NAME},
     axis=1
 )
 
@@ -32,16 +32,16 @@ for index, row in df_x_ray.iterrows():
     
     images_002 = constant.PROJECT_DIRECTORY + constant.DATA_DIRECTORY + constant.IMAGES_002_DIRECTORY + '/';
     
-    if os.path.isfile(images_001 + row['image_file_name']):
-        print("aq 1")
-        row['image_directory_file_name'] = images_001 + row['image_file_name']
-    elif os.path.isfile(images_002 + row['image_file_name']):
-        print("aq 2")
-        row['image_directory_file_name'] = images_002 + row['image_file_name']
+    if os.path.isfile(images_001 + row[constant.IMAGE_FILE_NAME]):
+        row[constant.IMAGE_DIRECTORY_FILE_NAME] = images_001 + row[constant.IMAGE_FILE_NAME]
+    elif os.path.isfile(images_002 + row[constant.IMAGE_FILE_NAME]):
+        row[constant.IMAGE_DIRECTORY_FILE_NAME] = images_002 + row[constant.IMAGE_FILE_NAME]
     
-df_x_ray = df_x_ray[df_x_ray['image_directory_file_name'] != ""]
+df_x_ray = df_x_ray[df_x_ray[constant.IMAGE_DIRECTORY_FILE_NAME] != ""]
 
-df_patient = df_x_ray.drop_duplicates(subset=['patient_id', 'patient_gender'])
+df_patient = df_x_ray.drop_duplicates(subset=[constant.PATIENT_ID, constant.PATIENT_GENDER])
+
+print("finalizou preparação dos dados")
 
 #connect database
 con = psycopg2.connect(
@@ -69,45 +69,55 @@ cur.execute(constant.SQL_CREATE_X_RAY)
 
 con.commit()
 
+print("finalizou create tables")
+
 #insert data
 
 #patient
 for index, row in df_patient.iterrows():
     cur.execute(
         constant.SQL_INSERT_PATIENT, 
-        (row['patient_id'], 
-         row['patient_gender'])
+        (row[constant.PATIENT_ID], 
+         row[constant.PATIENT_GENDER])
     )
     
 con.commit()
+
+print("finalizou inserts de pacientes")
 
 #follow_up
 for index, row in df_x_ray.iterrows():
     cur.execute(
         constant.SQL_INSERT_FOLLOW_UP, 
-        (row['follow_up_id'], 
-         row['patient_id'], 
-         row['patient_age'], 
-         row['finding_label'])
+        (row[constant.FOLLOW_UP_ID], 
+         row[constant.PATIENT_ID], 
+         row[constant.PATIENT_AGE], 
+         row[constant.FINDING_LABEL])
     )
 
 con.commit()
+
+print("finalizou inserts de acompanhamentos")
 
 #x_ray
 for index, row in df_x_ray.iterrows():
-    image = open(row['image_directory_file_name'], 'rb').read()
+    image = open(row[constant.IMAGE_DIRECTORY_FILE_NAME], 'rb').read()
     cur.execute(
         constant.SQL_INSERT_X_RAY, 
-        (row['follow_up_id'], 
-         row['patient_id'],
-         row['view_position'],
+        (row[constant.FOLLOW_UP_ID], 
+         row[constant.PATIENT_ID],
+         row[constant.VIEW_POSITION],
          psycopg2.Binary(image),
-         row['original_image_width'],
-         row['original_image_height'],
-         row['original_image_pixel_spacing'])
+         row[constant.ORIGINAL_IMAGE_WIDTH],
+         row[constant.ORIGINAL_IMAGE_HEIGHT],
+         row[constant.ORIGINAL_IMAGE_SPACING])
     )
 
 con.commit()
+
+print("finalizou inserts de raio-x")
+
+con.close()
 
 
 
