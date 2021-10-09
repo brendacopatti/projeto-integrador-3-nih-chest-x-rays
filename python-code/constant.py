@@ -1,8 +1,8 @@
 #POSTGRESQL CONNECTION
 POSTGRESQL_HOST='localhost'
 POSTGRESQL_DATABASE='nih-chest-x-rays'
-POSTGRESQL_USER='postgres'
-POSTGRESQL_PASSWORD='12345'
+POSTGRESQL_USER='utfpr'
+POSTGRESQL_PASSWORD='senhautfpr'
 
 #DROP TABLES
 SQL_DROP_X_RAY='drop table if exists x_ray'
@@ -20,7 +20,7 @@ SQL_INSERT_FOLLOW_UP='insert into follow_up(id, patient_id, patient_age, finding
 SQL_INSERT_X_RAY='insert into x_ray(follow_up_id, patient_id, view_position, image, original_image_width, original_image_height, original_image_pixels) values (%s, %s, %s, bytea(%s), %s, %s, %s)'
 
 #PROJECT
-PROJECT_DIRECTORY='/media/brenda/Dados/PosCienciaDados/Modulo3/ProjetoIntegrador/projeto-integrador-3-radiografia-torax'
+PROJECT_DIRECTORY='/home/luizim/Documentos/UTFPR/Dev/projeto-integrador-3-radiografia-torax'
 DATA_DIRECTORY='/data'
 IMAGES_001_DIRECTORY='/images_001'
 IMAGES_002_DIRECTORY='/images_002'
