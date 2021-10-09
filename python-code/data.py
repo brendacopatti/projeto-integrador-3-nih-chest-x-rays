@@ -179,6 +179,7 @@ print("\tfinalizou inserts de raio-x")
 #Distance, similarity, search funcs
 for f in constant.FUNC_LIST:
     cur.execute(f)
+con.commit()
 print("finalizou declaração de funções no postgres")
 
 con.close()
