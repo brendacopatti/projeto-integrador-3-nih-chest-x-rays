@@ -1,2 +1,9 @@
 
 *.png
+python-code/__pycache__/*
+python-code/example_erase*
+python-code/test.py
+.idea/*
+.idea
+
+*.pyc
