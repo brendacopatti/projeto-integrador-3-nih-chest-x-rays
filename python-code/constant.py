@@ -47,3 +47,212 @@ YOUNG_ADULTS='Young adults'
 MIDDLE_AGED_ADULTS='Middle-aged adults'
 OLD_ADULTS='Old adults'
 
+#NEW FUNCTIONS
+L1 = '''
+create or replace function l1(elem1 float[], elem2 float[]) returns float as $$
+declare
+ size integer;
+ somat float;
+begin
+ select cardinality(histogram) into size from continous limit 1;
+ somat := 0;
+ for i in 1..size loop
+    somat := somat + ABS(elem1[i] - elem2[i]);
+ end loop;
+ return somat;
+end $$
+language plpgsql;
+'''
+L2 = '''
+create or replace function l2(elem1 float[], elem2 float[]) returns float as $$
+declare
+ size integer;
+ somat float;
+begin
+ select cardinality(histogram) into size from continous limit 1;
+ somat := 0;
+ for i in 1..size loop
+    somat := somat + (ABS(elem1[i] - elem2[i])*ABS(elem1[i] - elem2[i]));
+ end loop;
+ return sqrt(somat);
+end $$
+language plpgsql; 
+'''
+COSINE='''
+create or replace function cosine(elem1 float[], elem2 float[]) returns float as $$
+declare
+ size integer;
+ dotprod float;
+ norm_a float;
+ norm_b float;
+begin
+ select cardinality(histogram) into size from x_ray limit 1;
+ dotprod := 0;
+ norm_a := 0;
+ norm_b := 0;
+ for i in 1..size loop
+    dotprod := dotprod + (elem1[i] * elem2[i]);
+	norm_a := norm_a + (elem1[i] * elem1[i]);
+	norm_b := norm_b + (elem2[i] * elem2[i]);
+ end loop;
+ return (dotprod) / (sqrt(norm_a) * sqrt(norm_b));
+end $$
+language plpgsql;
+'''
+GETHIST = '''
+create or replace function get_features(flw_id integer, pat_id integer)
+returns float[] as $$
+declare
+  out_vec float[];
+begin
+  select xr.histogram
+    into out_vec
+	from x_ray xr
+	where xr.patient_id = pat_id and follow_up_id = flw_id;
+	
+	return out_vec;
+end; $$ language plpgsql;
+'''
+RQueryL1 = '''
+create or replace function RangeQueryl1(
+	flw_id integer,
+	pat_id integer,
+	radius float
+) 
+returns table (
+	follow_up_id integer,
+	patient_id integer,
+	distance float
+) as $$
+begin
+  return query
+      select xr.follow_up_id,
+			 xr.patient_id,
+			 l1(get_features(flw_id, pat_id),
+			    xr.histogram) as distance
+      from x_ray xr
+      where l1(get_features(flw_id, pat_id), xr.histogram) <= radius;
+end $$
+language plpgsql;
+'''
+
+RQueryL2 = '''
+create or replace function RangeQueryl2(
+	flw_id integer,
+	pat_id integer,
+	radius float
+) 
+returns table (
+	follow_up_id integer,
+	patient_id integer,
+	distance float
+) as $$
+begin
+  return query
+      select xr.follow_up_id,
+			 xr.patient_id,
+			 l1(get_features(flw_id, pat_id),
+			    xr.histogram) as distance
+      from x_ray xr
+      where l2(get_features(flw_id, pat_id), xr.histogram) <= radius;
+end $$
+language plpgsql;
+'''
+
+RQueryCos = '''
+create or replace function RangeQueryCos(
+	flw_id integer,
+	pat_id integer,
+	radius float
+) 
+returns table (
+	follow_up_id integer,
+	patient_id integer,
+	distance float
+) as $$
+begin
+  return query
+      select xr.follow_up_id,
+			 xr.patient_id,
+			 cosine(get_features(flw_id, pat_id),
+			    xr.histogram) as distance
+      from x_ray xr
+      where cosine(get_features(flw_id, pat_id), xr.histogram) >= radius;
+end $$
+language plpgsql;
+'''
+
+KNNL1 ='''
+create or replace function KNNl1(
+    	flw_id integer,
+        pat_id integer,
+        k integer
+        ) 
+returns table (	
+    follow_up_id integer,
+	patient_id integer,
+	distance float
+) as $$
+begin
+  return query 
+            select xr.follow_up_id,
+			 xr.patient_id,
+             l1(get_features(flw_id, pat_id),
+			    xr.histogram) as distance
+      from x_ray xr
+      order by l1(get_features(flw_id, pat_id), xr.histogram) LIMIT k;
+ end $$
+ language plpgsql;
+ '''
+ 
+ 
+KNNL2 ='''
+create or replace function KNNl2(
+    	flw_id integer,
+        pat_id integer,
+        k integer
+        ) 
+returns table (	
+    follow_up_id integer,
+	patient_id integer,
+	distance float
+) as $$
+begin
+  return query 
+            select xr.follow_up_id,
+			 xr.patient_id,
+             l2(get_features(flw_id, pat_id),
+			    xr.histogram) as distance
+      from x_ray xr
+      order by l2(get_features(flw_id, pat_id), xr.histogram) LIMIT k;
+ end $$
+ language plpgsql;
+ '''
+ 
+KNNCOS = '''
+create or replace function KNNcos(
+    	flw_id integer,
+        pat_id integer,
+        k integer
+        ) 
+returns table (	
+    follow_up_id integer,
+	patient_id integer,
+	distance float
+) as $$
+begin
+  return query 
+            select xr.follow_up_id,
+			 xr.patient_id,
+             cosine(get_features(flw_id, pat_id),
+			    xr.histogram) as distance
+      from x_ray xr
+      order by cosine(get_features(flw_id, pat_id), xr.histogram) DESC 
+	  LIMIT k;
+ end $$
+ language plpgsql;
+ '''
+ 
+FUNC_LIST = [L1, L2, COSINE, GETHIST, 
+             RQueryL1, RQueryL2, RQueryCos, 
+             KNNL1, KNNL2, KNNCOS]

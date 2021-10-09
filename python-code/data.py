@@ -147,7 +147,6 @@ def hist_calc(img_path):
     return vec_str
 
 
-#df_x_ray['histogram'] = df_x_ray.image_directory_file_name.apply(hist_calc)
 print("iniciando inserts de raio-x\n\tpode demorar um pouco...")
 size = df_x_ray.shape[0]
 n = 0
@@ -175,5 +174,11 @@ for index, row in df_x_ray.iterrows():
 con.commit()
 
 print("\tfinalizou inserts de raio-x")
+
+
+#Distance, similarity, search funcs
+for f in constant.FUNC_LIST:
+    cur.execute(f)
+print("finalizou declaração de funções no postgres")
 
 con.close()
