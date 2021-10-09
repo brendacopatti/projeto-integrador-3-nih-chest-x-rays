@@ -6,3 +6,4 @@ python-code/test.py
 .idea/*
 .idea
 
+*.pyc

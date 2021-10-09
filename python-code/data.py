@@ -2,12 +2,17 @@ import pandas as pd
 import os
 import psycopg2
 import constant
+from skimage.exposure import histogram
+from skimage.color import rgb2gray
+from PIL import Image
+
 
 #read and prepare data
 df_x_ray = pd.read_csv(
     constant.PROJECT_DIRECTORY + constant.DATA_DIRECTORY + constant.DATA_ENTRY_CSV_FILE, 
     header=None, 
-    sep=','
+    sep=',',
+    low_memory=False
 )
 
 df_x_ray[10] = ''
@@ -115,8 +120,41 @@ con.commit()
 print("finalizou inserts de acompanhamentos")
 
 #x_ray
+
+# open as PIL image and calc histogram
+
+def hist_calc(img_path):
+    '''
+    Returns histogram color 256 from a image
+
+    Parameters
+    ----------
+    img_path : str
+        Path for the image.
+
+    Returns
+    -------
+    str
+        color histogram 256 for the given image.
+
+    '''
+    im = Image.open(img_path)
+    vec_str = '{'
+    for item in im.histogram():
+        vec_str += str(item)+', '
+    vec_str = vec_str[:-2]+'}'
+    
+    return vec_str
+
+
+#df_x_ray['histogram'] = df_x_ray.image_directory_file_name.apply(hist_calc)
+print("iniciando inserts de raio-x\n\tpode demorar um pouco...")
+size = df_x_ray.shape[0]
+n = 0
+percent = 0
 for index, row in df_x_ray.iterrows():
     image = open(row[constant.IMAGE_DIRECTORY_FILE_NAME], 'rb').read()
+    hist_vect = hist_calc(row[constant.IMAGE_DIRECTORY_FILE_NAME])
     cur.execute(
         constant.SQL_INSERT_X_RAY, 
         (row[constant.FOLLOW_UP_ID], 
@@ -125,11 +163,17 @@ for index, row in df_x_ray.iterrows():
          psycopg2.Binary(image),
          row[constant.ORIGINAL_IMAGE_WIDTH],
          row[constant.ORIGINAL_IMAGE_HEIGHT],
-         row[constant.ORIGINAL_IMAGE_SPACING])
+         row[constant.ORIGINAL_IMAGE_SPACING],
+         hist_vect)
     )
-
+    
+    if int(100*n/size) > percent:
+        percent = int(100*n/size)
+        print(f"{percent}%".center(10,"*"))
+    n+=1
+    
 con.commit()
 
-print("finalizou inserts de raio-x")
+print("\tfinalizou inserts de raio-x")
 
 con.close()
