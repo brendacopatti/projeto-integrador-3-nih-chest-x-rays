@@ -1,0 +1,83 @@
+select * from follow_up limit 5
+select * from patient limit 5
+select * from x_ray limit 3
+
+select distinct finding_label from follow_up order by finding_label
+select distinct patient_age_group from follow_up
+
+-- Grupos de consultas e descrição
+
+-- q1.1 - retorna a idade média de pacientes de acordo com cada diagnóstico
+SELECT finding_label AS x_ray_diagnosis, AVG(patient_age) AS mean_age
+FROM follow_up
+GROUP BY x_ray_diagnosis
+ORDER BY mean_age
+
+-- q1.2 - retorna o número de pacientes com determinado diagnóstico de acordo com o grupo etário
+SELECT patient_age_group, finding_label AS x_ray_diagnosis, COUNT(patient_id) AS number_of_patients
+FROM follow_up
+GROUP BY patient_age_group, finding_label
+ORDER BY CASE WHEN patient_age_group = 'Children' THEN 1
+			  WHEN patient_age_group = 'Young adults' THEN 2
+			  WHEN patient_age_group = 'Middle-aged adults' THEN 3
+			  WHEN patient_age_group = 'Old adults' THEN 4
+			  END,
+	     number_of_patients;
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+-- q2.1 - retorna a idade média dos pacientes por diagnóstico e gênero
+SELECT gender, finding_label AS x_ray_diagnosis, AVG(patient_age) AS mean_age
+FROM patient AS p, follow_up AS f
+WHERE p.id = f.patient_id
+GROUP BY gender, finding_label
+ORDER BY finding_label;
+
+-- q2.2 - retorna o número de pacientes do grupo idosos por diagnóstico e gênero (slice)
+SELECT gender, finding_label AS x_ray_diagnosis, COUNT(patient_id) AS number_of_patients
+FROM patient AS p, follow_up AS f
+WHERE p.id = f.patient_id AND
+	patient_age_group = 'Old adults'
+GROUP BY gender, x_ray_diagnosis
+ORDER BY x_ray_diagnosis
+
+-----------------------------------------------------------------------------------------------
+
+-- q3.1 - retorna id, gênero, idade e o raio x dos pacientes com diagnóstico de cardiomegalia e idade menor e igual a 30 anos (slice)
+SELECT f.patient_id, gender, patient_age, image
+FROM patient as p, x_ray as x, follow_up as f
+WHERE x.patient_id = p.id AND
+	f.patient_id = p.id AND
+	finding_label ILIKE '%Cardiomegaly%' AND
+	patient_age <= 30
+GROUP BY f.patient_id, p.gender, f.patient_age, x.image
+ORDER BY patient_age;
+	
+-- q3.2 - retorna os pacientes com idade entre 70 e 80 anos que apresentaram um diagnóstico de nódulo ou hérnia (dice)
+SELECT f.patient_id, gender, patient_age, finding_label AS x_ray_diagnosis, image
+FROM patient AS p, follow_up AS f, x_ray AS x
+WHERE f.patient_id = p.id AND
+	f.patient_id = x.patient_id AND
+	patient_age BETWEEN 70 AND 80 AND
+	(finding_label ILIKE '%Hernia%' OR finding_label ILIKE '%Nodule%')
+GROUP BY f.patient_id, f.patient_age, p.gender, f.finding_label, x.image
+ORDER BY f.patient_age
+
+--------------------------------------------------------------------------------------------------
+
+-- q4.1 - retorna o número de pacientes por diagnóstic, grupo etário e genêro
+SELECT gender, patient_age_group, finding_label AS x_ray_diagnosis, COUNT(patient_id) AS number_of_patients
+FROM patient AS p, follow_up AS f
+WHERE p.id = f.patient_id AND
+	(patient_age_group = 'Middle-aged adults' OR patient_age_group = 'Old adults') AND
+	(finding_label ILIKE '%Cardiomegaly%' OR finding_label ILIKE '%Fibrosis%')
+GROUP BY p.gender, f.patient_age_group, f.finding_label
+ORDER BY f.patient_age_group, f.finding_label;
+
+-- q4.2
+SELECT gender, patient_age, finding_label AS x_ray_diagnosis, COUNT(patient_id) AS number_of_patients
+FROM patient AS p, follow_up AS f
+WHERE p.id = f.patient_id AND
+	patient_age >= 50 AND patient_age <= 70 AND
+	(finding_label ILIKE '%Cardiomegaly%' OR finding_label ILIKE '%Fibrosis%')
+GROUP BY p.gender, f.patient_age, f.finding_label
+ORDER BY f.patient_age, f.finding_label;
