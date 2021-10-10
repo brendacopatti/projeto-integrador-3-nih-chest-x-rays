@@ -54,7 +54,7 @@ declare
  size integer;
  somat float;
 begin
- select cardinality(histogram) into size from continous limit 1;
+ select cardinality(histogram) into size from x_ray limit 1;
  somat := 0;
  for i in 1..size loop
     somat := somat + ABS(elem1[i] - elem2[i]);
@@ -69,7 +69,7 @@ declare
  size integer;
  somat float;
 begin
- select cardinality(histogram) into size from continous limit 1;
+ select cardinality(histogram) into size from x_ray limit 1;
  somat := 0;
  for i in 1..size loop
     somat := somat + (ABS(elem1[i] - elem2[i])*ABS(elem1[i] - elem2[i]));
