@@ -151,7 +151,7 @@ begin
   return query
       select xr.follow_up_id,
 			 xr.patient_id,
-			 l1(get_features(flw_id, pat_id),
+			 l2(get_features(flw_id, pat_id),
 			    xr.histogram) as distance
       from x_ray xr
       where l2(get_features(flw_id, pat_id), xr.histogram) <= radius;
