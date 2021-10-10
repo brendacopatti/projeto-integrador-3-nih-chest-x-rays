@@ -7,3 +7,7 @@ python-code/test.py
 .idea
 
 *.pyc
+python-code/charts.py
+textoRIBC.pdf
+textoRIBC.odt
+*.pyc
