@@ -2,8 +2,6 @@ import pandas as pd
 import os
 import psycopg2
 import constant
-from skimage.exposure import histogram
-from skimage.color import rgb2gray
 from PIL import Image
 
 
